@@ -22,10 +22,3 @@ def pascal_triangle(n):
         triangle.append(new_row)
 
     return triangle
-
-def print_triangle(triangle):
-    """
-    Print triangle
-    """
-    for row in triangle:
-        print("[{}]".format(",".join([str(x) for x in row])))
