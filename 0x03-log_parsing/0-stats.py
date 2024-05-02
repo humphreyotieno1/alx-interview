@@ -1,59 +1,50 @@
 #!/usr/bin/python3
-"""strict to read stdn line by line and compute metrics"""
+"""
+log parsing
+"""
+
 import sys
 import re
-import signal
 
 
-def validate_line(line):
-    """validates the line using regex and returns status code and file size"""
-    pattern = (
-        r"(\d+\.\d+\.\d+\.\d+) - \[.*\] \"GET /projects/260 HTTP/1\.1\" "
-        r"(\d+) (\d+)"
-    )
-    matching = re.match(pattern, line)
-    if matching:
-        status_code = matching.group(2)
-        file_size = int(matching.group(3))
-        return [status_code, file_size]
-    return None
-
-
-def print_metrics(status, f_size):
-    """prints the status code and filesize metrics"""
-    print(f"File size: {f_size}")
-    for key, value in status.items():
-        if value > 0:
-            print(f"{key}: {value}")
-
-
-def signal_handler(sig, frame):
-    """handles CTRL-C interrupt signal and prints metrics before exit"""
-    print_metrics(status_codes, total_file_size)
-    sys.exit(0)
-
-
-def main():
-    """main entry point of the program"""
-    line_done = 0
-    global status_codes, total_file_size
-    status_codes = {
-        "200": 0, "301": 0, "400": 0, "401": 0,
-        "403": 0, "404": 0, "405": 0, "500": 0
-        }
-    total_file_size = 0
-    signal.signal(signal.SIGINT, signal_handler)
-    try:
-        for line in sys.stdin:
-            result = validate_line(line)
-            total_file_size += result[1]
-            status_codes[result[0]] += 1
-            line_done += 1
-            if line_done % 10 == 0:
-                print_metrics(status_codes, total_file_size)
-    except KeyboardInterrupt:
-        print_metrics(status_codes, total_file_size)
+def output(log: dict) -> None:
+    """
+    helper function to display stats
+    """
+    print("File size: {}".format(log["file_size"]))
+    for code in sorted(log["code_frequency"]):
+        if log["code_frequency"][code]:
+            print("{}: {}".format(code, log["code_frequency"][code]))
 
 
 if __name__ == "__main__":
-    main()
+    regex = re.compile(
+    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} - \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d+\] "GET /projects/260 HTTP/1.1" (.{3}) (\d+)')  # nopep8
+
+    line_count = 0
+    log = {}
+    log["file_size"] = 0
+    log["code_frequency"] = {
+        str(code): 0 for code in [
+            200, 301, 400, 401, 403, 404, 405, 500]}
+
+    try:
+        for line in sys.stdin:
+            line = line.strip()
+            match = regex.fullmatch(line)
+            if (match):
+                line_count += 1
+                code = match.group(1)
+                file_size = int(match.group(2))
+
+                # File size
+                log["file_size"] += file_size
+
+                # status code
+                if (code.isdecimal()):
+                    log["code_frequency"][code] += 1
+
+                if (line_count % 10 == 0):
+                    output(log)
+    finally:
+        output(log)
