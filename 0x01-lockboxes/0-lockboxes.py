@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+'''Implementation for lockboxes algorithm problem'''
+
 
 def canUnlockAll(boxes):
     # Create a set to keep track of the boxes that have been visited
