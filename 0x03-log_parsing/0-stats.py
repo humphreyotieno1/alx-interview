@@ -44,7 +44,7 @@ if __name__ == "__main__":
                 log["file_size"] += file_size
 
                 # Update status code frequency
-                if code.isdecimal():
+                if code in log["code_frequency"]:
                     log["code_frequency"][code] += 1
 
                 # Print stats every 10 lines
