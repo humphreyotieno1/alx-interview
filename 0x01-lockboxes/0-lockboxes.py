@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 def canUnlockAll(boxes):
     # Create a set to keep track of the boxes that have been visited
