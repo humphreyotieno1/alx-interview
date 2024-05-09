@@ -1,7 +1,8 @@
 #!/usr/bin/python3
-
+'''UTF8 Validation module'''
 
 def validUTF8(data):
+    '''Function to perform validation'''
     num_bytes = 0
 
     for num in data:
